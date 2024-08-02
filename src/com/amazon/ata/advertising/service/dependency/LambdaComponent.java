@@ -18,7 +18,8 @@ import javax.inject.Singleton;
 @Component(modules = {
         ExternalServiceModule.class,
         DaoModule.class,
-        DynamoDBModule.class
+        DynamoDBModule.class,
+        StringModule.class
 })
 public interface LambdaComponent {
     /**

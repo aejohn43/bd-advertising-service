@@ -2,11 +2,13 @@ package com.amazon.ata.advertising.service.model;
 
 import org.apache.commons.lang3.StringUtils;
 
+import javax.inject.Inject;
 import java.util.Objects;
 
 /**
  * Information derived from a service request object.
  */
+
 public class RequestContext {
     private final boolean recognizedCustomer;
     private final String customerId;
@@ -19,6 +21,7 @@ public class RequestContext {
      *                   is recognized.
      * @param marketplaceId The marketplace to view the advertisement in.
      */
+    @Inject
     public RequestContext(String customerId, String marketplaceId) {
         if (StringUtils.isBlank(customerId)) {
             this.recognizedCustomer = false;

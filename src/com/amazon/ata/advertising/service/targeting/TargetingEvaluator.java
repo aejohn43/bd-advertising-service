@@ -4,13 +4,15 @@ import com.amazon.ata.advertising.service.model.RequestContext;
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicate;
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicateResult;
 
+import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Evaluates TargetingPredicates for a given RequestContext.
  */
 public class TargetingEvaluator {
-    public static final boolean IMPLEMENTED_STREAMS = false;
+    public static final boolean IMPLEMENTED_STREAMS = true;
     public static final boolean IMPLEMENTED_CONCURRENCY = false;
     private final RequestContext requestContext;
 
@@ -18,6 +20,7 @@ public class TargetingEvaluator {
      * Creates an evaluator for targeting predicates.
      * @param requestContext Context that can be used to evaluate the predicates.
      */
+    @Inject
     public TargetingEvaluator(RequestContext requestContext) {
         this.requestContext = requestContext;
     }
@@ -30,16 +33,24 @@ public class TargetingEvaluator {
      */
     public TargetingPredicateResult evaluate(TargetingGroup targetingGroup) {
         List<TargetingPredicate> targetingPredicates = targetingGroup.getTargetingPredicates();
-        boolean allTruePredicates = true;
+        /*boolean allTruePredicates = true;
         for (TargetingPredicate predicate : targetingPredicates) {
             TargetingPredicateResult predicateResult = predicate.evaluate(requestContext);
             if (!predicateResult.isTrue()) {
                 allTruePredicates = false;
                 break;
             }
+        }*/
+        Optional<TargetingPredicate> optional = targetingPredicates.stream()
+                .filter(predicate -> !predicate.evaluate(requestContext).isTrue())
+                .findAny();
+        if (optional.isPresent()){
+            return TargetingPredicateResult.FALSE;
         }
-
-        return allTruePredicates ? TargetingPredicateResult.TRUE :
-                                   TargetingPredicateResult.FALSE;
+        else {
+            return TargetingPredicateResult.TRUE;
+        }
+        /*return allTruePredicates ? TargetingPredicateResult.TRUE :
+                                   TargetingPredicateResult.FALSE;*/
     }
 }

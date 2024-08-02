@@ -4,6 +4,7 @@ import com.amazon.ata.advertising.service.dao.ReadableDao;
 import com.amazon.ata.advertising.service.model.AdvertisementContent;
 import com.amazon.ata.advertising.service.model.EmptyGeneratedAdvertisement;
 import com.amazon.ata.advertising.service.model.GeneratedAdvertisement;
+import com.amazon.ata.advertising.service.targeting.TargetingEvaluator;
 import com.amazon.ata.advertising.service.targeting.TargetingGroup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,9 @@ public class AdvertisementSelectionLogicTest {
     private ReadableDao<String, List<TargetingGroup>> targetingGroupDao;
 
     @Mock
+    private TargetingEvaluator targetingEvaluator;
+
+    @Mock
     private Random random;
 
     private AdvertisementSelectionLogic adSelectionService;
@@ -49,7 +53,7 @@ public class AdvertisementSelectionLogicTest {
     @BeforeEach
     public void setup() {
         initMocks(this);
-        adSelectionService = new AdvertisementSelectionLogic(contentDao, targetingGroupDao);
+        adSelectionService = new AdvertisementSelectionLogic(contentDao, targetingGroupDao, targetingEvaluator);
         adSelectionService.setRandom(random);
     }
 
