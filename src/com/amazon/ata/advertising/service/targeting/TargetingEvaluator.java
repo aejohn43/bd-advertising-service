@@ -7,14 +7,19 @@ import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicate
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Evaluates TargetingPredicates for a given RequestContext.
  */
 public class TargetingEvaluator {
     public static final boolean IMPLEMENTED_STREAMS = true;
-    public static final boolean IMPLEMENTED_CONCURRENCY = false;
+    public static final boolean IMPLEMENTED_CONCURRENCY = true;
     private final RequestContext requestContext;
+    ExecutorService executorService = Executors.newCachedThreadPool();
 
     /**
      * Creates an evaluator for targeting predicates.
@@ -42,7 +47,16 @@ public class TargetingEvaluator {
             }
         }*/
         Optional<TargetingPredicate> optional = targetingPredicates.stream()
-                .filter(predicate -> !predicate.evaluate(requestContext).isTrue())
+                .filter(predicate -> {
+                    Future<Boolean> future = executorService.submit(() -> {
+                        return !predicate.evaluate(requestContext).isTrue();
+                    });
+                    try {
+                        return future.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .findAny();
         if (optional.isPresent()){
             return TargetingPredicateResult.FALSE;
