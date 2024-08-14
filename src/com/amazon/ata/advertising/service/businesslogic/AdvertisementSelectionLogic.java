@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 
 /**
@@ -78,14 +79,16 @@ public class AdvertisementSelectionLogic {
             }*/
             //.filter(content -> targetingEvaluator.evaluate(targetingGroupDao.get(content.getContentId()).get(0)).isTrue())
             //this for letter coming from bellow
-                Optional<TargetingGroup> subContents = Optional.of(contents)
+                 Stream<TargetingGroup> streams = Optional.of(contents)
                         .orElse(Collections.emptyList())
                         .stream()
                         .flatMap(content -> {
                             return targetingGroupDao.get(content.getContentId()).stream();
                         })
-                        .sorted(Comparator.comparing(TargetingGroup::getClickThroughRate))
-                        .filter(targetingGroup -> targetingEvaluator.evaluate(targetingGroup).isTrue() )
+                        .sorted(Comparator.comparing(TargetingGroup::getClickThroughRate).reversed());
+
+            Optional<TargetingGroup> subContents = streams
+                        .filter(targetingGroup -> targetingEvaluator.evaluate(targetingGroup).isTrue())
                         //.filter(content -> targetingEvaluator.evaluate(targetingGroupDao.get(content.getContentId()).get(0)).isTrue())
                         .findFirst();
                 if (subContents.isPresent()){
